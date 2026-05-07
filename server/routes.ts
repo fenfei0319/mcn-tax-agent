@@ -8,7 +8,7 @@ import type { Express, Request, Response } from "express";
 import type { Server } from "node:http";
 import { z } from "zod";
 import multer from "multer";
-import { insertTalentSchema, insertIncomeSchema } from "@shared/schema";
+import { insertTalentSchema, insertIncomeSchema } from "../shared/schema";
 
 import { talentRepo } from "./modules/talentRepo";
 import { incomeRepo } from "./modules/incomeRepo";

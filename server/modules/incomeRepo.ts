@@ -5,7 +5,7 @@
  * ============================================================ */
 
 import { store } from "../db";
-import type { InsertIncome, Income, TaxRecord, Talent } from "@shared/schema";
+import type { InsertIncome, Income, TaxRecord, Talent } from "../shared/schema";
 import type { TaxResult } from "./taxEngine";
 
 export interface IncomeWithTalent extends Income {

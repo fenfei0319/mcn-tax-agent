@@ -7,7 +7,7 @@
  * 数据生命周期: 随进程存在,重启后丢失。本系统为评审/演示场景,无持久化诉求。
  * ============================================================ */
 
-import type { Talent, Income, TaxRecord, KycLog, Filing } from "@shared/schema";
+import type { Talent, Income, TaxRecord, KycLog, Filing } from "../shared/schema";
 
 interface Sequencer {
   next(): number;

@@ -7,7 +7,7 @@
  * ============================================================ */
 
 import { store } from "../db";
-import type { KycLog } from "@shared/schema";
+import type { KycLog } from "../shared/schema";
 
 export interface IKycLogRepo {
   add(log: Omit<KycLog, "id" | "createdAt">): KycLog;

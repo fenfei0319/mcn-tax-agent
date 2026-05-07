@@ -6,7 +6,7 @@
  * ============================================================ */
 
 import { store } from "../db";
-import type { InsertTalent, Talent } from "@shared/schema";
+import type { InsertTalent, Talent } from "../shared/schema";
 
 export interface ITalentRepo {
   list(keyword?: string): Talent[];
