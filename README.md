@@ -9,9 +9,14 @@
 
 ## 在线 Demo
 
-由于公开发布权限受限,本仓库为评审主入口。代码已可在本地一条命令运行,见下方「快速开始」。
+项目已适配 Vercel 一键部署(内置 Serverless Function + 静态主机):
 
-如需图文走查,可参考 PRD 的 v1.0 → v1.3 各章节;每个版本均对应可运行的代码状态。
+1. 访问 [vercel.com/new](https://vercel.com/new) 使用 GitHub 账号登录
+2. 导入本仓库 `fenfei0319/mcn-tax-agent`
+3. 保留默认设置(Vercel 会识别 `vercel.json` 的 `vercel-build` 脚本)点击 Deploy
+4. ~30 秒后得到形如 `https://mcn-tax-agent.vercel.app` 的公网链接
+
+本地运行见下方「快速开始」,一条命令启动。
 
 ---
 
@@ -33,8 +38,9 @@
 
 - **前端**: React 18 + Vite + TypeScript + Tailwind CSS v3 + shadcn/ui + TanStack Query + wouter
 - **后端**: Express + TypeScript
-- **数据**: better-sqlite3 + Drizzle ORM(零依赖启动,自动建表)
-- **构建**: tsx + esbuild
+- **数据**: 内存 Map(零依赖,备期可中心化替换为 SQL/Supabase)
+- **构建**: tsx + esbuild + Vite
+- **部署**: Vercel Serverless(静态资源 + API 函数分离)
 
 ## 架构原则
 
@@ -97,5 +103,6 @@ mcn-tax-agent/
 | v1.1 | 批量处理与 CSV 导出 |
 | v1.2 | 双源验证拆分 + 小红书一键同步 |
 | v1.3 | 体验细化:核验日志复核视图、数字样式标准化、文案克制化 |
+| v1.4 | 部署适配:数据层从 SQLite 重构为内存存储 + Vercel Serverless |
 
 每个版本的设计目标、变更明细与架构落实详见 PRD 各章节。

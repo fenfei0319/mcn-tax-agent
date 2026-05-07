@@ -1,12 +1,12 @@
 /* ============================================================
  * 模块: 达人档案数据访问层 (Talent Repository)
- * 职责: 封装 talents 表的 CRUD,屏蔽底层数据库。
- *      上层(API/批量任务)只依赖该接口,不直接 SQL。
+ * 职责: 封装 talents 集合的 CRUD,屏蔽底层存储。
+ *      上层(API/批量任务)只依赖该接口,不直接访问存储。
+ * v1.4: 从 SQL 改为内存 Map,接口签名零变化。
  * ============================================================ */
 
-import { db } from "../db";
-import { talents, type InsertTalent, type Talent } from "@shared/schema";
-import { eq, like, or } from "drizzle-orm";
+import { store } from "../db";
+import type { InsertTalent, Talent } from "@shared/schema";
 
 export interface ITalentRepo {
   list(keyword?: string): Talent[];
@@ -20,43 +20,67 @@ export interface ITalentRepo {
 
 class TalentRepo implements ITalentRepo {
   list(keyword?: string): Talent[] {
+    const all = Array.from(store.talents.values());
     if (keyword && keyword.trim()) {
-      const k = `%${keyword.trim()}%`;
-      return db.select().from(talents)
-        .where(or(like(talents.name, k), like(talents.idCard, k)))
-        .all();
+      const k = keyword.trim();
+      return all.filter(t => t.name.includes(k) || t.idCard.includes(k));
     }
-    return db.select().from(talents).all();
+    return all;
   }
 
   getById(id: number) {
-    return db.select().from(talents).where(eq(talents.id, id)).get();
+    return store.talents.get(id);
   }
 
   getByIdCard(idCard: string) {
-    return db.select().from(talents).where(eq(talents.idCard, idCard)).get();
+    for (const t of store.talents.values()) {
+      if (t.idCard === idCard) return t;
+    }
+    return undefined;
   }
 
   create(t: InsertTalent): Talent {
-    return db.insert(talents).values({
-      ...t,
+    const id = store.seq.talents.next();
+    const created: Talent = {
+      id,
+      name: t.name,
+      idCard: t.idCard,
+      mobile: t.mobile ?? null,
+      bankCard: t.bankCard ?? null,
+      incomeType: t.incomeType,
+      relation: t.relation,
       kycStatus: "unverified",
+      note: t.note ?? null,
       createdAt: new Date().toISOString(),
-    }).returning().get();
+    };
+    store.talents.set(id, created);
+    return created;
   }
 
   update(id: number, patch: Partial<InsertTalent>): Talent | undefined {
-    db.update(talents).set(patch).where(eq(talents.id, id)).run();
-    return this.getById(id);
+    const existed = store.talents.get(id);
+    if (!existed) return undefined;
+    const next: Talent = {
+      ...existed,
+      ...(patch.name !== undefined && { name: patch.name }),
+      ...(patch.idCard !== undefined && { idCard: patch.idCard }),
+      ...(patch.mobile !== undefined && { mobile: patch.mobile ?? null }),
+      ...(patch.bankCard !== undefined && { bankCard: patch.bankCard ?? null }),
+      ...(patch.incomeType !== undefined && { incomeType: patch.incomeType }),
+      ...(patch.relation !== undefined && { relation: patch.relation }),
+      ...(patch.note !== undefined && { note: patch.note ?? null }),
+    };
+    store.talents.set(id, next);
+    return next;
   }
 
   remove(id: number): boolean {
-    const r = db.delete(talents).where(eq(talents.id, id)).run();
-    return r.changes > 0;
+    return store.talents.delete(id);
   }
 
   setKycStatus(id: number, status: "verified" | "failed" | "unverified") {
-    db.update(talents).set({ kycStatus: status }).where(eq(talents.id, id)).run();
+    const t = store.talents.get(id);
+    if (t) store.talents.set(id, { ...t, kycStatus: status });
   }
 }
 
