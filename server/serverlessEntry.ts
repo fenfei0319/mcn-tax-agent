@@ -8,7 +8,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import { createServer } from "node:http";
-import { registerRoutes } from "../server/routes";
+import { registerRoutes } from "./routes";
 
 const app = express();
 const httpServer = createServer(app);
